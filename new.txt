@@ -1,0 +1,217 @@
+#=========================================BFS and DFS ========================================================
+import collections
+# BFS algorithm
+def bfs(graph, root):
+    visited, queue = set(), collections.deque([root])
+    visited.add(root)
+    while queue:
+        # Dequeue a vertex from queue
+        vertex = queue.popleft()
+        print(str(vertex) + " ", end="")
+        # If not visited, mark it as visited, and
+        # enqueue it
+        for neighbour in graph[vertex]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.append(neighbour)
+if __name__ == '__main__':
+    graph = {0: [1, 2], 1: [4,2], 2: [3], 4: [1], 3: [1, 2]}
+    print("Following is Breadth First Traversal: ")
+    bfs(graph, 0)
+
+
+
+# DFS algorithm
+def dfs(graph, start, visited=None):
+    if visited is None:
+        visited = set()
+    visited.add(start)
+    print(start + " ", end="")
+    for next in graph[start] - visited:
+        dfs(graph, next, visited)
+    return visited
+graph = {'0': set(['1', '2']),
+         '1': set(['0', '3', '4']),
+         '2': set(['0']),
+         '3': set(['1']),
+         '4': set(['2', '3'])}
+dfs(graph, '0')
+
+#=========================================A* algo============================================================
+import heapq
+
+GOAL = (1,2,3,4,5,6,7,8,0)
+MOVES = {'up': -3, 'down': 3, 'left': -1, 'right': 1}
+
+def manhattan(state):
+    return sum(abs((val-1)//3 - i//3) + abs((val-1)%3 - i%3)
+               for i, val in enumerate(state) if val)
+
+def get_neighbors(state):
+    i = state.index(0)
+    neighbors = []
+    for move, d in MOVES.items():
+        j = i + d
+        if 0 <= j < 9 and not (move == 'left' and i % 3 == 0) and not (move == 'right' and i % 3 == 2):
+            lst = list(state)
+            lst[i], lst[j] = lst[j], lst[i]
+            neighbors.append(tuple(lst))
+    return neighbors
+
+def astar(start):
+    heap = [(manhattan(start), 0, start, [])]
+    visited = set()
+    while heap:
+        f, g, state, path = heapq.heappop(heap)
+        if state == GOAL:
+            return path + [state]
+        if state in visited: continue
+        visited.add(state)
+        for neighbor in get_neighbors(state):
+            heapq.heappush(heap, (g+1+manhattan(neighbor), g+1, neighbor, path + [state]))
+    return None
+
+start = (1,2,3,4,0,6,7,5,8)
+path = astar(start)
+for p in path:
+    print(p[:3], p[3:6], p[6:], sep="\n")
+    print("---")
+
+#=============================PRIMS=====================================================================================
+import heapq
+from collections import defaultdict
+def prim(graph, start):
+    mst = []
+    visited = set([start])
+    edges = [(cost, start, to) for to, cost in graph[start]]
+    heapq.heapify(edges)
+
+    while edges:
+        cost, frm, to = heapq.heappop(edges)
+        if to not in visited:
+            visited.add(to)
+            mst.append((frm, to, cost))
+            for neighbor, weight in graph[to]:
+                if neighbor not in visited:
+                    heapq.heappush(edges, (weight, to, neighbor))
+    return mst
+graph = {
+    'A': [('B', 2), ('C', 3)],
+    'B': [('A', 2), ('C', 1), ('D', 1)],
+    'C': [('A', 3), ('B', 1), ('D', 4)],
+    'D': [('B', 1), ('C', 4)]
+}
+mst = prim(graph, 'A')
+for frm, to, cost in mst:
+    print(f"{frm} - {to}: {cost}")
+#=====================================Krushkal=========================================================================
+class DisjointSet:
+    def __init__(self, vertices):
+        self.parent = {v: v for v in vertices}
+
+    def find(self, v):
+        if self.parent[v] != v:
+            self.parent[v] = self.find(self.parent[v])  # Path compression
+        return self.parent[v]
+
+    def union(self, u, v):
+        root_u = self.find(u)
+        root_v = self.find(v)
+        if root_u != root_v:
+            self.parent[root_v] = root_u
+            return True
+        return False
+
+def kruskal(vertices, edges):
+    ds = DisjointSet(vertices)
+    mst = []
+
+    edges.sort(key=lambda x: x[2])
+    for u, v, weight in edges:
+        if ds.union(u, v):
+            mst.append((u, v, weight))
+    return mst
+
+vertices = ['A', 'B', 'C', 'D']
+edges = [
+    ('A', 'B', 2),
+    ('A', 'C', 3),
+    ('B', 'C', 1),
+    ('B', 'D', 1),
+    ('C', 'D', 4)
+]
+mst = kruskal(vertices, edges)
+for u, v, weight in mst:
+    print(f"{u} - {v}: {weight}")
+
+#==========================================n queen================================================================
+def solve_n_queens_single(n):
+    board = [-1] * n
+    solution = []
+
+    def backtrack(row, cols, diag1, diag2):
+        if row == n:
+            solution.append(board[:])
+            return True  # stop after finding the first solution
+        for col in range(n):
+            if col in cols or (row + col) in diag1 or (row - col) in diag2:
+                continue
+            board[row] = col
+            cols.add(col)
+            diag1.add(row + col)
+            diag2.add(row - col)
+            if backtrack(row + 1, cols, diag1, diag2):
+                return True
+            # Backtrack
+            cols.remove(col)
+            diag1.remove(row + col)
+            diag2.remove(row - col)
+        return False
+
+    backtrack(0, set(), set(), set())
+    return solution[0] if solution else None
+
+# Example usage
+n = 5
+sol = solve_n_queens_single(n)
+if sol:
+    for i in sol:
+        print(". " * i + "Q " + ". " * (n - i - 1))
+else:
+    print("No solution found.")
+#======================================chatbot=========================================================================
+from chatterbot import ChatBot
+from chatterbot.trainers import ListTrainer
+
+# Initialize the chatbot
+bot = ChatBot('Bot')
+trainer = ListTrainer(bot)
+
+# Train the bot with multiple inputs
+trainer.train([
+    "Hi, can I help you",
+    "Who are you?",
+    "I am your virtual assistant. Ask me any questions...",
+    "Where do you operate?",
+    "We operate from Singapore",
+    "What payment methods do you accept?",
+    "We accept debit cards and major credit cards",
+    "I would like to speak to your customer service agent",
+    "please call +65 3333 3333. Our operating hours are from 9am to 5pm, Monday to Friday"
+])
+
+trainer.train([
+    "What payment methods do you offer?",
+    "We accept debit cards and major credit cards",
+    "How to contact customer service agent",
+    "please call +65 3333 3333. Our operating hours are from 9am to 5pm, Monday to Friday"
+])
+
+
+while True:
+    request = input('you : ')
+    if request.lower() == 'ok' or request.lower() == 'bye':
+        print('Bot: bye')
+        break
+    response = bot.get_response(request)
+    print('Bot:', response)
