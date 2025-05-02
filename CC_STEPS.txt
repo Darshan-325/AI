@@ -1,0 +1,96 @@
+A3 : Creating an Application in SalesForce.com using
+Apex programming Language.
+
+1. Visit Salesforce.com and log in.
+
+2. Create custom object from Object Manager and Create the fields and types.
+
+3. Go to Setup Home and Seach Apex Classes.
+
+4. Create New Apex Class with name CreateAccount.apxc,
+ Paste the following code:
+
+public class CreateAccount {
+public String name { get; set; }
+public String phoneNumber { get; set; }
+public String selectedIndustry { get; set; }
+public String websiteURL { get; set; }
+public List<SelectOption> industryList { get; set; }
+public CreateAccount(ApexPages.StandardController controller) {
+industryList = new List<SelectOption>();
+industryList.add(new SelectOption('','- None -'));
+industryList.add(new SelectOption('IT','IT'));
+industryList.add(new SelectOption('MECH','MECH'));
+industryList.add(new SelectOption('CHEM','CHEM'));
+industryList.add(new SelectOption('PHARMA','PHARMA'));
+}
+
+public PageReference createAccount() {
+if(!String.isEmpty(name)) {
+Account newAccount = new Account(
+Name = name,
+Phone = phoneNumber,
+Industry = selectedIndustry,
+Website = websiteURL
+);
+
+insert newAccount;
+PageReference pg = new PageReference('/' + newAccount.Id);
+pg.setRedirect(true);
+return pg;
+} else {
+ApexPages.addMessage(new
+ApexPages.Message(ApexPages.Severity.CONFIRM, 'Please enter Account Name'));
+}
+return null;
+}
+
+public PageReference cancelAccount() {
+PageReference pg = new PageReference('/' +
+Schema.SObjectType.Account.getKeyPrefix() + '/o');
+return pg;
+}
+
+5. Click File → New → Visualforce Page. (CreateAccountPage.vfp) 
+Paste the following code:
+
+<apex:page standardController="Account" extensions="CreateAccount">
+<apex:form id="apexForm">
+<apex:pageBlock title="Create Account:" id="pageBlockId">
+<apex:pageMessages id="showmsg"></apex:pageMessages>
+<apex:pageBlockSection columns="2">
+<apex:inputText value="{!name}" label="Account Name" required="true"/>
+<apex:inputText value="{!phoneNumber}" label="Phone"/>
+<apex:selectList size="1" value="{!selectedIndustry}" label="Industry">
+
+<apex:selectOptions value="{!industryList}"/>
+</apex:selectList>
+<apex:inputText value="{!websiteURL}" label="Website"/>
+</apex:pageBlockSection>
+<apex:pageBlockButtons >
+<apex:commandButton action="{!createAccount}" value="Save"/>
+<apex:commandButton action="{!cancelAccount}" value="Cancel"/>
+</apex:pageBlockButtons>
+</apex:pageBlock>
+</apex:form>
+</apex:page>
+
+6. Go to Tabs Section and set the visualforce file.
+
+7. Go to App Luncher.
+
+8. Preview the App.
+
+
+
+A4: Design and develop custom Application using Sales force Cloud.
+
+SIMILAR STEPS AS ABOVE 
+
+9. Go to App Luncher From Quick FInd Box.
+
+10. Select New Lightning Application.
+
+11. Provide App Name, Logo, Users, Tabs, Etc.
+
+12. Preview App By App Luncher.
